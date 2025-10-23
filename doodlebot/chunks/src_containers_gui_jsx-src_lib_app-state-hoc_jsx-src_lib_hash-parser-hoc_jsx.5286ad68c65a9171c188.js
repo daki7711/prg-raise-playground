@@ -42684,7 +42684,9 @@ class Runtime extends EventEmitter {
       }
     }
     if (blockInfo.blockType === BlockType.REPORTER) {
-      if (!blockInfo.disableMonitor && context.inputList.length === 0) {
+      //if (!blockInfo.disableMonitor && context.inputList.length === 0) {
+      // EDITED HERE
+      if (!blockInfo.disableMonitor) {
         blockJSON.checkboxInFlyout = true;
       }
     } else if (blockInfo.blockType === BlockType.LOOP) {
@@ -44010,6 +44012,26 @@ class Runtime extends EventEmitter {
       label: "".concat(categoryInfo.name, ": ").concat(block.info.text)
     };
   }
+
+  /** BEGIN PRG Additions */
+
+  getLabelForOpcodeWithArgument(extendedOpcode, args) {
+    const [category, opcode] = StringUtil.splitFirst(extendedOpcode, '_');
+    if (!(category && opcode)) return;
+    const categoryInfo = this._blockInfo.find(ci => ci.id === category);
+    if (!categoryInfo) return;
+
+    // Concatenate the argument values in the order of their keys
+    const labelArgs = Object.keys(args).sort() // optional, ensures arg1, arg2, etc., in order
+    .map(key => args[key]).join(' ');
+    return {
+      category: 'extension',
+      // assumes all extensions have the same monitor color
+      label: "".concat(categoryInfo.name, ": ").concat(labelArgs)
+    };
+  }
+
+  /** BEGIN PRG Additions */
 
   /**
    * Create a new global variable avoiding conflicts with other variable names.
@@ -72798,6 +72820,10 @@ class Cast {
       }
       return value;
     }
+    if (typeof value === 'string') {
+      const n = parseFloat(value.trim());
+      return Number.isNaN(n) ? 0 : n;
+    }
     const n = Number(value);
     if (Number.isNaN(n)) {
       // Scratch treats NaN as 0, when needed as a number.
@@ -72890,8 +72916,20 @@ class Cast {
    * @returns {number} Negative number if v1 < v2; 0 if equal; positive otherwise.
    */
   static compare(v1, v2) {
-    let n1 = Number(v1);
-    let n2 = Number(v2);
+    let n1;
+    if (typeof v1 === 'string' && !Number.isNaN(parseFloat(v1.trim()))) {
+      const n = parseFloat(v1.trim());
+      n1 = Number.isNaN(n) ? 0 : n;
+    } else {
+      n1 = Number(v1);
+    }
+    let n2;
+    if (typeof v2 === 'string' && !Number.isNaN(parseFloat(v2.trim()))) {
+      const n = parseFloat(v2.trim());
+      n2 = Number.isNaN(n) ? 0 : n;
+    } else {
+      n2 = Number(v2);
+    }
     if (n1 === 0 && Cast.isWhiteSpace(v1)) {
       n1 = NaN;
     } else if (n2 === 0 && Cast.isWhiteSpace(v2)) {
@@ -74388,6 +74426,7 @@ class VirtualMachine extends EventEmitter {
     this.flyoutBlockListener = this.flyoutBlockListener.bind(this);
     this.monitorBlockListener = this.monitorBlockListener.bind(this);
     this.variableListener = this.variableListener.bind(this);
+    requestAnimationFrame(() => this.extensionManager.loadExtensionURL("doodlebot"));
   }
 
   /**
@@ -74625,7 +74664,8 @@ class VirtualMachine extends EventEmitter {
             'Authorization': 'Bearer ' + authToken
           }
         });
-        resolve(this.loadProject(await response.text()));
+        const buffer = await response.arrayBuffer();
+        resolve(this.loadProject(buffer));
       });
     } else if (url.includes("dropbox.com")) {
       // Handle loading dropbox links
@@ -85858,4 +85898,4 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"scratch-vm","version":"4.5.15
 /***/ })
 
 }]);
-//# sourceMappingURL=src_containers_gui_jsx-src_lib_app-state-hoc_jsx-src_lib_hash-parser-hoc_jsx.de77fb775aa9f3e9d0f9.js.map
+//# sourceMappingURL=src_containers_gui_jsx-src_lib_app-state-hoc_jsx-src_lib_hash-parser-hoc_jsx.5286ad68c65a9171c188.js.map
