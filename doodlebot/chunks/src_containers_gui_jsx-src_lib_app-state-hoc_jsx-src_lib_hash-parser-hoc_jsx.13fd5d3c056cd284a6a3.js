@@ -29149,7 +29149,7 @@ const isUndefined = a => typeof a === 'undefined';
     label,
     category,
     labelFn
-  } = vm && vm.runtime.getLabelForOpcode(opcode) || _opcode_labels_js__WEBPACK_IMPORTED_MODULE_0__["default"].getLabel(opcode);
+  } = vm && (Object.keys(params).length > 0 ? vm.runtime.getLabelForOpcodeWithArgument(opcode, params) : vm.runtime.getLabelForOpcode(opcode)) || _opcode_labels_js__WEBPACK_IMPORTED_MODULE_0__["default"].getLabel(opcode);
 
   // Use labelFn if provided for dynamic labelling (e.g. variables)
   if (!isUndefined(labelFn)) label = labelFn(params);
@@ -85898,4 +85898,4 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"scratch-vm","version":"4.5.15
 /***/ })
 
 }]);
-//# sourceMappingURL=src_containers_gui_jsx-src_lib_app-state-hoc_jsx-src_lib_hash-parser-hoc_jsx.5286ad68c65a9171c188.js.map
+//# sourceMappingURL=src_containers_gui_jsx-src_lib_app-state-hoc_jsx-src_lib_hash-parser-hoc_jsx.13fd5d3c056cd284a6a3.js.map
